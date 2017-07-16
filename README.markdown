@@ -98,9 +98,7 @@ PROGRAM OPERATION
 `<ESC>` - Escape current input mode.   
 `q` - Quit
 
-
-NAVIGATION
-----------------------------
+### SCROLLING
 `h, <left>` - Scroll left.  
 `l, <right>` - Scroll right.  
 `j, <down>` - Scroll down.  
@@ -108,6 +106,7 @@ NAVIGATION
 `<pageup>` - Scroll up a whole screen.  
 `<pagedown>` - Scroll down a whole screen.  
 
+### NAVIGATION
 `H, K` - Go to previous page.  
 `J, L` - Go to next page.  
 `g` - Go to first page of document.  

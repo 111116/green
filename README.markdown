@@ -26,11 +26,30 @@ MATE.
  - search function
  - scheme support
  
+DEPENDENCIES
+------------
+
+- C Compiler
+- GNU make or similar
+- libpoppler (including development files)
+- libSDL (including devopment files)
+
+
+**Ubuntu installation:**
+```plain
+apt-get install libpoppler-glib-dev libsdl1.2-dev
+git clone https://github.com/111116/green
+cd green
+make
+```
+
  
 SYNOPSIS
 --------
 
-`green [options] <PDF file 1> [PDF file 2] ...`
+```plain
+green [options] <PDF file 1> [PDF file 2] ...
+```
 
 
 OPTIONS

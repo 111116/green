@@ -14,7 +14,7 @@ DESCRIPTION
 However, it can also be used inside a graphical X11 Session like GNOME or
 MATE. 
 
-`green` features:
+*green* features:
 
  - uses libpoppler for PDF reading
  - uses SDL to support various frontends (including framebuffer)
@@ -36,32 +36,30 @@ DEPENDENCIES
 
 
 ### Ubuntu installation:
-```plain
-apt-get install libpoppler-glib-dev libsdl1.2-dev
-git clone https://github.com/111116/green
-cd green
-make
-```
+
+    apt-get install libpoppler-glib-dev libsdl1.2-dev
+    git clone https://github.com/111116/green
+    cd green
+    make
+
 
 ### Create command-line shortcut:
-```plain
-echo alias green='<your installation directory>/green' >> ~/.bash_aliases
-source ~/.bash_aliases
-```
 
- 
+    echo alias green='<your installation directory>/green' >> ~/.bash_aliases
+    source ~/.bash_aliases
+
+
 USAGE
 --------
 
-```plain
-green [options] <PDF file 1> [PDF file 2] ...
-```
+    green [options] <PDF file 1> [PDF file 2] ...
+
+
 ### example:
-```plain
-green -nomouse -fit=page example.pdf
-green -help
-greep -v
-```
+
+    green -nomouse -fit=page example.pdf
+    green -help
+    greep -v
 
 
 OPTIONS
@@ -98,22 +96,22 @@ OPTIONS
 PROGRAM OPERATION
 ------------------
 `<TAB>` - Go to the next open document.   
-`<F<n>>` - Go to the n-th document.    
-`ESC` - Escape current input mode.      
+`F<n>` - Go to the n-th document.    
+`<ESC>` - Escape current input mode.      
 `q` - Quit
 
 
 NAVIGATION INSIDE A DOCUMENT
 ----------------------------
-`<h, left arrow>` - Scroll left.  
-`<l, right arrow>` - Scroll right.  
-`<j, down arrow>` - Scroll down.  
-`<k, up arrow>` - Scroll up.  
+`h, <left>` - Scroll left.  
+`l, <right>` - Scroll right.  
+`j, <down>` - Scroll down.  
+`k, <up>` - Scroll up.  
 `<pageup>` - Go to previous page.  
 `<pagedown>` - Go to next page.  
-`<g<n>RETURN>` - Go to page n.  
-`<+, =>` - Zoom in.  
-`<->` - Zoom out. 
+`g<n><RETURN>` - Go to page n.  
+`+, =` - Zoom in.  
+`-` - Zoom out.  
 `c` - close document.
 
 ### FITTING
@@ -158,16 +156,16 @@ FILES
   The system wide configuration file.   
   
 **example config:**  
-```plain
-# file ~/.green.conf
-SCHEME normal
-{
-	Background.Color = darkgray
-	Fit = width
-	Mouse = 0
-}
-DEFAULT_SCHEME normal
-```
+
+    # file ~/.green.conf
+    SCHEME normal
+    {
+    	Background.Color = darkgray
+    	Fit = width
+    	Mouse = 0
+    }
+    DEFAULT_SCHEME normal
+
 
 
 ORIGINAL AUTHOR

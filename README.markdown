@@ -95,33 +95,40 @@ OPTIONS
 
 PROGRAM OPERATION
 ------------------
-`<TAB>` - Go to the next open document.   
-`F<n>` - Go to the n-th document.    
-`<ESC>` - Escape current input mode.      
+`<ESC>` - Escape current input mode.   
 `q` - Quit
 
 
-NAVIGATION INSIDE A DOCUMENT
+NAVIGATION
 ----------------------------
 `h, <left>` - Scroll left.  
 `l, <right>` - Scroll right.  
 `j, <down>` - Scroll down.  
 `k, <up>` - Scroll up.  
-`<pageup>` - Go to previous page.  
-`<pagedown>` - Go to next page.  
-`g<n><RETURN>` - Go to page n.  
-`+, =` - Zoom in.  
-`-` - Zoom out.  
-`c` - close document.
+`<pageup>` - Scroll up a whole screen.  
+`<pagedown>` - Scroll down a whole screen.  
+
+`H, K` - Go to previous page.  
+`J, L` - Go to next page.  
+`g` - Go to first page of document.  
+`G` - Go to last page of document.  
+`:<n><RETURN>` - Go to page n.  
+
+`P` - Go to previous document.  
+`N, <TAB>` - Go to next document.  
+`c` - close current document.  
+
 
 ### FITTING
+`+` - Zoom in.  
+`-` - Zoom out.  
 `fn` - disable page fitting mode.  
 `fw` - fit page width.  
 `fh` - fit page height.  
 `fp` - fit whole page.  
 
 ### SEARCHING 
-`s<X><RETURN>` - Start search for string *X*.  
+`(/ or s)<X><RETURN>` - Start search for string *X*.  
 `n` - Show next result.
 
 ### OTHER STUFF

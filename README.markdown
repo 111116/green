@@ -35,7 +35,7 @@ DEPENDENCIES
 - libSDL (including devopment files)
 
 
-**Ubuntu installation:**
+### Ubuntu installation:
 ```plain
 apt-get install libpoppler-glib-dev libsdl1.2-dev
 git clone https://github.com/111116/green

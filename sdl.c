@@ -461,6 +461,7 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
+		case '/':
 		case SDLK_s:
 			/* type s-SEARCHSTRING-<Enter> to search string */
 			state = SEARCH;

@@ -19,7 +19,7 @@
 
 
 #include <stdbool.h>
-#include "glib/poppler.h"
+#include <glib/poppler.h>
 
 
 #define GREEN_FULLSCREEN	0x0001
@@ -148,18 +148,27 @@ void	Green_ValidateOffset( Green_Document *doc, int width, int height )
 }
 
 inline static
-void	Green_NextVaildDoc( Green_RTD *rtd )
+int Green_PrevValidDoc( Green_RTD *rtd )
 {
-	int i;
-	
-	for (i = 1; i < rtd->doc_count; i++)
-		if (rtd->docs[(rtd->doc_cur+i)%rtd->doc_count])
+	for (int i = 1; i < rtd->doc_count; i++)
+		if (rtd->docs[(rtd->doc_cur + rtd->doc_count - i) % rtd->doc_count])
+		{
+			rtd->doc_cur = (rtd->doc_cur + rtd->doc_count - i) % rtd->doc_count;
+			return 0;
+		}
+	return 1;
+}
+
+inline static
+int	Green_NextValidDoc( Green_RTD *rtd )
+{
+	for (int i = 1; i < rtd->doc_count; i++)
+		if (rtd->docs[(rtd->doc_cur + i) % rtd->doc_count])
 		{
 			rtd->doc_cur = (rtd->doc_cur + i) % rtd->doc_count;
-			break;
+			return 0;
 		}
-	
-	return;
+	return 1;
 }
 
 inline static

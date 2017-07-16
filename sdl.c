@@ -25,7 +25,7 @@
 
 typedef enum
 {
-	NORMAL, GOTO, SEARCH, FIT, ROTATE, MIRROR
+	NORMAL, GOTO, SEARCH, FIT, MIRROR
 	
 }	RState;
 
@@ -544,9 +544,12 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 		case SDLK_r:
 			if (!doc)
 				break;
-			state = ROTATE;
+			if (!Green_IsDocValid( rtd, rtd->doc_cur ))
+				break;
+			Green_RotateRight( rtd->docs[rtd->doc_cur] );
+			Green_ValidateOffset( rtd->docs[rtd->doc_cur], display->w, display->h );
+			*flags |= FLAG_RENDER;
 			break;
-
 
 		case SDLK_F12:
 			f++;
@@ -770,25 +773,6 @@ int	Green_SDL_Main( Green_RTD *rtd )
 						else if (event.key.keysym.sym == 'v')
 						{
 							Green_MirrorV( rtd->docs[rtd->doc_cur] );
-							flags |= FLAG_RENDER;
-						}
-					}
-					else if (state == ROTATE)
-					{
-						state = NORMAL;
-						if (!Green_IsDocValid( rtd, rtd->doc_cur ))
-							break;
-						
-						if (event.key.keysym.sym == 'l')
-						{
-							Green_RotateLeft( rtd->docs[rtd->doc_cur] );
-							Green_ValidateOffset( rtd->docs[rtd->doc_cur], display->w, display->h );
-							flags |= FLAG_RENDER;
-						}
-						else if (event.key.keysym.sym == 'r')
-						{
-							Green_RotateRight( rtd->docs[rtd->doc_cur] );
-							Green_ValidateOffset( rtd->docs[rtd->doc_cur], display->w, display->h );
 							flags |= FLAG_RENDER;
 						}
 					}

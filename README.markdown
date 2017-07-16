@@ -116,6 +116,7 @@ PROGRAM OPERATION
 `P` - Go to previous document.  
 `N, <TAB>` - Go to next document.  
 `c` - close current document.  
+`f1`to`f12` - Goto n-th document.
 
 
 ### FITTING

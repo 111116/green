@@ -43,12 +43,24 @@ cd green
 make
 ```
 
+### Create command-line shortcut:
+```plain
+echo alias green='<your installation directory>/green' >> ~/.bash_aliases
+source ~/.bash_aliases
+```
+
  
-SYNOPSIS
+USAGE
 --------
 
 ```plain
 green [options] <PDF file 1> [PDF file 2] ...
+```
+### example:
+```plain
+green -nomouse -fit=page example.pdf
+green -help
+greep -v
 ```
 
 
@@ -97,21 +109,21 @@ NAVIGATION INSIDE A DOCUMENT
 `<l, right arrow>` - Scroll right.  
 `<j, down arrow>` - Scroll down.  
 `<k, up arrow>` - Scroll up.  
-`<pg up>` - Go to previous page.  
-`<pg dn>` - Go to next page.  
+`<pageup>` - Go to previous page.  
+`<pagedown>` - Go to next page.  
 `<g<n>RETURN>` - Go to page n.  
 `<+, =>` - Zoom in.  
 `<->` - Zoom out. 
 `c` - close document.
 
 ### FITTING
-`fn` - disable page fitting mode.
-`fw` - fit page width.
-`fh` - fit page height.
-`fp` - fit whole page.
+`fn` - disable page fitting mode.  
+`fw` - fit page width.  
+`fh` - fit page height.  
+`fp` - fit whole page.  
 
 ### SEARCHING 
-`s<X><RETURN> - Start search for string X.`
+`s<X><RETURN>` - Start search for string *X*.  
 `n` - Show next result.
 
 ### OTHER STUFF
@@ -144,6 +156,18 @@ FILES
 
 */usr/local/etc/green.conf*  
   The system wide configuration file.   
+  
+**example config:**  
+```plain
+# file ~/.green.conf
+SCHEME normal
+{
+	Background.Color = darkgray
+	Fit = width
+	Mouse = 0
+}
+DEFAULT_SCHEME normal
+```
 
 
 ORIGINAL AUTHOR

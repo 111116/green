@@ -38,7 +38,7 @@ INSTALLATION
 
 ### Ubuntu installation:
 
-    apt-get install libpoppler-glib-dev libsdl1.2-dev
+    sudo apt-get install libpoppler-glib-dev libsdl1.2-dev
     git clone https://github.com/111116/green
     cd green
     make

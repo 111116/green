@@ -50,17 +50,16 @@ void	GetInput( IBuffer *input, SDL_Event *event )
 		case SDLK_LEFT:
 			if (input->cur)
 				input->cur--;
-			
 			break;
+
 		case SDLK_RIGHT:
 			if (input->cur < input->used)
 				input->cur++;
-			
 			break;
+
 		case SDLK_BACKSPACE:
 			if (!input->cur)
 				break;
-			
 			input->cur--;
 		case SDLK_DELETE:
 			if (input->cur == input->used)
@@ -71,6 +70,7 @@ void	GetInput( IBuffer *input, SDL_Event *event )
 			
 			input->used--;
 			break;
+
 		case 'a'...'z':
 			if (event->key.keysym.mod & KMOD_SHIFT)
 				event->key.keysym.sym += 'A' - 'a';
@@ -386,87 +386,52 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 	if (Green_IsDocValid( rtd, rtd->doc_cur ))
 		doc = rtd->docs[rtd->doc_cur];
 	
-	switch (event->key.keysym.sym)
+	switch (event->key.keysym.unicode)
 	{
-		case 'q':
-			*flags |= FLAG_QUIT;
-			break;
-		case 'c':
-			Green_Close( rtd, rtd->doc_cur );
-			*flags |= FLAG_RENDER;
-			break;
-		case 'g':
+		// deal with uppercase keys
+		case ':':
 			state = GOTO;
 			break;
-		case SDLK_s:
-			/* type s-SEARCHSTRING-<Enter> to search string */
-			state = SEARCH;
-			break;
-		case 'n':
-			if (!doc || !doc->search_str)
-				break;
-			
-			doc->page_cur = Green_FindNext( doc, doc->page_cur + 1 );
+
+		case 'g': // goto doc begin
+			rtd->docs[rtd->doc_cur]->page_cur = 0;
+			rtd->docs[rtd->doc_cur]->xoffset = 0;
+			rtd->docs[rtd->doc_cur]->yoffset = 0;
 			*flags |= FLAG_RENDER;
 			break;
-		case 'f':
-			state = FIT;
-			break;
-		case SDLK_UP:
-		case SDLK_k:
-			if (!doc)
-				break;
-			Green_ScrollRelative( doc, 0, - display->h * rtd->step, display->w, display->h, 1 );
+
+		case 'G': // goto doc end
+			rtd->docs[rtd->doc_cur]->page_cur = rtd->docs[rtd->doc_cur]->page_count - 1;
+			rtd->docs[rtd->doc_cur]->xoffset = 0;
+			rtd->docs[rtd->doc_cur]->yoffset = 0;
 			*flags |= FLAG_RENDER;
 			break;
-		case SDLK_DOWN:
-        case SDLK_j:
-			if (!doc)
-				break;
-			
-			Green_ScrollRelative( doc, 0, display->h * rtd->step, display->w, display->h, 1 );
+
+		case 'P':
+			Green_PrevValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
-		case SDLK_LEFT:
-		case SDLK_h:
-			if (!doc)
-				break;
-			
-			Green_ScrollRelative( doc, - display->w * rtd->step, 0, display->w, display->h, 1 );
+
+		case 'N':
+			Green_NextValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
-		case SDLK_l:
-		case SDLK_RIGHT:
-			if (!doc)
-				break;
-			
-			Green_ScrollRelative( doc, display->w * rtd->step, 0, display->w, display->h, 1 );
-			*flags |= FLAG_RENDER;
-			break;
-		case SDLK_PAGEUP:
+
+		case 'K':
+		case 'H':
 			if (!doc || !Green_GotoPage( doc, doc->page_cur - 1, true ))
 				break;
-			
 			*flags |= FLAG_RENDER;
 			break;
-		case SDLK_PAGEDOWN:
+
+		case 'J':
+		case 'L':
 			if (!doc || !Green_GotoPage( doc, doc->page_cur + 1, true ))
 				break;
 			
 			*flags |= FLAG_RENDER;
 			break;
-		case SDLK_m:
-			if (!doc)
-				break;
-			
-			state = MIRROR;
-			break;
-		case SDLK_r:
-			if (!doc)
-				break;
-			
-			state = ROTATE;
-			break;
+
 		case '=':
 		case '+':
 			if (!doc)
@@ -475,6 +440,7 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			Green_Zoom( doc, display->w,display->h, doc->finescale * rtd->zoomstep );
 			*flags |= FLAG_RENDER;
 			break;
+
 		case '-':
 			if (!doc)
 				break;
@@ -482,6 +448,105 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			Green_Zoom( doc, display->w,display->h, doc->finescale / rtd->zoomstep );
 			*flags |= FLAG_RENDER;
 			break;
+
+	default:
+	switch (event->key.keysym.sym)
+	{
+		case 'q':
+			*flags |= FLAG_QUIT;
+			break;
+
+		case 'c':
+			Green_Close( rtd, rtd->doc_cur );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_s:
+			/* type s-SEARCHSTRING-<Enter> to search string */
+			state = SEARCH;
+			break;
+
+		case 'n':
+			// search next
+			if (!doc || !doc->search_str)
+				break;
+			
+			doc->page_cur = Green_FindNext( doc, doc->page_cur + 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case 'f':
+			state = FIT;
+			break;
+
+		case SDLK_UP:
+		case SDLK_k:
+			// scroll up
+			if (!doc)
+				break;
+			Green_ScrollRelative( doc, 0, - display->h * rtd->step, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_DOWN:
+        case SDLK_j:
+			// scroll down
+			if (!doc)
+				break;
+			
+			Green_ScrollRelative( doc, 0, display->h * rtd->step, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_LEFT:
+		case SDLK_h:
+			// scroll left
+			if (!doc)
+				break;
+			
+			Green_ScrollRelative( doc, - display->w * rtd->step, 0, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_l:
+		case SDLK_RIGHT:
+			// scroll right
+			if (!doc)
+				break;
+			
+			Green_ScrollRelative( doc, display->w * rtd->step, 0, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_PAGEUP: // pageup
+			// scroll up a whole page
+			if (!doc)
+				break;
+			Green_ScrollRelative( doc, 0, - display->h * 1, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_PAGEDOWN: // pagedn
+			// scroll down a whole page
+			if (!doc)
+				break;
+			Green_ScrollRelative( doc, 0, display->h * 1, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_m:
+			if (!doc)
+				break;
+			state = MIRROR;
+			break;
+
+		case SDLK_r:
+			if (!doc)
+				break;
+			state = ROTATE;
+			break;
+
+
 		case SDLK_F12:
 			f++;
 		case SDLK_F11:
@@ -507,16 +572,19 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 		case SDLK_F1:
 			if (!Green_IsDocValid( rtd, f ))
 				break;
-			
 			rtd->doc_cur = f;
 			*flags |= FLAG_RENDER;
 			break;
+
+
 		case SDLK_TAB:
-			Green_NextVaildDoc( rtd );
+			Green_NextValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
+
 		default:
 			break;
+	}
 	}
 	
 	return state;
@@ -580,6 +648,7 @@ int	Green_SDL_Main( Green_RTD *rtd )
 	if (!rtd->mouse.visibility || !(rtd->mouse.flags & 0x01))
 		SDL_ShowCursor( SDL_DISABLE );
 
+	SDL_EnableUNICODE( SDL_ENABLE );
 	SDL_EnableKeyRepeat( SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL );
 	
 	do

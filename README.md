@@ -26,9 +26,10 @@ MATE.
  - search function
  - scheme support
  
-DEPENDENCIES
+INSTALLATION
 ------------
 
+### Dependencies:
 - C Compiler
 - GNU make or similar
 - libpoppler (including development files)
@@ -42,11 +43,12 @@ DEPENDENCIES
     cd green
     make
 
+### NOTE:  
+The Makefile installation currently may NOT be working correctly.  
+To manually install this program **after compilation**, run the following commands:
 
-### Create command-line shortcut:
-
-    echo alias green='<your installation directory>/green' >> ~/.bash_aliases
-    source ~/.bash_aliases
+    sudo install green /usr/bin/
+    sudo install green.1 /usr/share/man/man1/
 
 
 USAGE

@@ -157,9 +157,6 @@ double	Green_Fit( Green_Document *doc, int w, int h )
 	PopplerPage	*page;
 	double	pwidth, pheight;
 	
-	if (doc->fit_method == NATURAL)
-		return 1;
-	
 	page = poppler_document_get_page( doc->doc, doc->page_cur );
 	if (doc->rotation % 2)
 		poppler_page_get_size( page, &pheight, &pwidth );
@@ -170,8 +167,6 @@ double	Green_Fit( Green_Document *doc, int w, int h )
 		return w / pwidth;
 	else if (doc->fit_method == HEIGHT)
 		return h / pheight;
-	else if (doc->fit_method == PAGE)
-		return (w / pwidth <= h / pheight) ? w / pwidth : h / pheight;
 	
 	return 1;
 }

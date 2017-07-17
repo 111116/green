@@ -540,22 +540,32 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			break;
 
 		case SDLK_SLASH:
-		case SDLK_s:
 			// START SEARCHING
 			state = SEARCH;
 			break;
 
 		case SDLK_f:
-			if (!Green_IsDocValid( rtd, rtd->doc_cur ))
+			if (SDL_GetModState() & KMOD_CTRL)
+			{
+				// START SEARCHING
+				state = SEARCH;
 				break;
-			rtd->docs[rtd->doc_cur]->fit_method = HEIGHT;
-			rtd->docs[rtd->doc_cur]->finescale = 1;
-			rtd->docs[rtd->doc_cur]->xoffset = 0;
-			rtd->docs[rtd->doc_cur]->yoffset = 0;
-			*flags |= FLAG_RENDER;
-			break;
+			}
+			else
+			{
+				// fit by height
+				if (!Green_IsDocValid( rtd, rtd->doc_cur ))
+					break;
+				rtd->docs[rtd->doc_cur]->fit_method = HEIGHT;
+				rtd->docs[rtd->doc_cur]->finescale = 1;
+				rtd->docs[rtd->doc_cur]->xoffset = 0;
+				rtd->docs[rtd->doc_cur]->yoffset = 0;
+				*flags |= FLAG_RENDER;
+				break;
+			}
 
 		case SDLK_w:
+			// fit by width
 			if (!Green_IsDocValid( rtd, rtd->doc_cur ))
 				break;
 			rtd->docs[rtd->doc_cur]->fit_method = WIDTH;

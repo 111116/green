@@ -386,94 +386,163 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 	if (Green_IsDocValid( rtd, rtd->doc_cur ))
 		doc = rtd->docs[rtd->doc_cur];
 	
-	switch (event->key.keysym.unicode)
+	switch (event->key.keysym.sym)
 	{
-		// deal with uppercase keys
-		case ':':
-			state = GOTO;
-			break;
-
-		case 'g': // goto doc begin
-			rtd->docs[rtd->doc_cur]->page_cur = 0;
+		case SDLK_g:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// goto doc end
+				rtd->docs[rtd->doc_cur]->page_cur = rtd->docs[rtd->doc_cur]->page_count - 1;
+			}
+			else
+			{
+				// goto doc begin
+				rtd->docs[rtd->doc_cur]->page_cur = 0;
+			}
 			rtd->docs[rtd->doc_cur]->xoffset = 0;
 			rtd->docs[rtd->doc_cur]->yoffset = 0;
 			*flags |= FLAG_RENDER;
 			break;
 
-		case 'G': // goto doc end
-			rtd->docs[rtd->doc_cur]->page_cur = rtd->docs[rtd->doc_cur]->page_count - 1;
-			rtd->docs[rtd->doc_cur]->xoffset = 0;
-			rtd->docs[rtd->doc_cur]->yoffset = 0;
+		case SDLK_k:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// last page
+				if (!doc || !Green_GotoPage( doc, doc->page_cur - 1, true ))
+					break;
+			}
+			else
+			{
+				// scroll up
+				if (!doc)
+					break;
+				Green_ScrollRelative( doc, 0, - display->h * rtd->step, display->w, display->h, 1 );
+			}
 			*flags |= FLAG_RENDER;
 			break;
 
-		case 'P':
-			Green_PrevValidDoc( rtd );
-			*flags |= FLAG_RENDER;
-			break;
-
-		case 'N':
-			Green_NextValidDoc( rtd );
-			*flags |= FLAG_RENDER;
-			break;
-
-		case 'K':
-		case 'H':
-			if (!doc || !Green_GotoPage( doc, doc->page_cur - 1, true ))
-				break;
-			*flags |= FLAG_RENDER;
-			break;
-
-		case 'J':
-		case 'L':
-			if (!doc || !Green_GotoPage( doc, doc->page_cur + 1, true ))
-				break;
-			
-			*flags |= FLAG_RENDER;
-			break;
-
-		case '=':
-		case '+':
+		case SDLK_UP:
+			// scroll up
 			if (!doc)
 				break;
-			
-			Green_Zoom( doc, display->w,display->h, doc->finescale * rtd->zoomstep );
+			Green_ScrollRelative( doc, 0, - display->h * rtd->step, display->w, display->h, 1 );
 			*flags |= FLAG_RENDER;
 			break;
 
-		case '-':
+		case SDLK_h:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// last page
+				if (!doc || !Green_GotoPage( doc, doc->page_cur - 1, true ))
+					break;
+			}
+			else
+			{
+				// scroll left
+				if (!doc)
+					break;
+				Green_ScrollRelative( doc, - display->w * rtd->step, 0, display->w, display->h, 1 );
+			}
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_LEFT:
+			// scroll left
 			if (!doc)
 				break;
-			
+			Green_ScrollRelative( doc, - display->w * rtd->step, 0, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_j:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// next page
+				if (!doc || !Green_GotoPage( doc, doc->page_cur + 1, true ))
+					break;
+			}
+			else
+			{
+				// scroll down
+				if (!doc)
+					break;
+				Green_ScrollRelative( doc, 0, display->h * rtd->step, display->w, display->h, 1 );
+			}
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_l:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// next page
+				if (!doc || !Green_GotoPage( doc, doc->page_cur + 1, true ))
+					break;
+			}
+			else
+			{
+				// scroll right
+				if (!doc)
+					break;
+				Green_ScrollRelative( doc, display->w * rtd->step, 0, display->w, display->h, 1 );
+			}
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_DOWN:
+			// scroll down
+			if (!doc)
+				break;
+			Green_ScrollRelative( doc, 0, display->h * rtd->step, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_RIGHT:
+			// scroll right
+			if (!doc)
+				break;
+			Green_ScrollRelative( doc, display->w * rtd->step, 0, display->w, display->h, 1 );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_SEMICOLON:
+			// GOTO MODE
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				state = GOTO;
+				break;
+			}
+
+		case SDLK_MINUS:
+			// ZOOM OUT
+			if (!doc)
+				break;
 			Green_Zoom( doc, display->w,display->h, doc->finescale / rtd->zoomstep );
 			*flags |= FLAG_RENDER;
 			break;
 
-	default:
-	switch (event->key.keysym.sym)
-	{
-		case 'q':
+		case SDLK_EQUALS:
+			// ZOOM IN
+			if (!doc)
+				break;
+			Green_Zoom( doc, display->w,display->h, doc->finescale * rtd->zoomstep );
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_q:
+			// QUIT PROGRAM
 			*flags |= FLAG_QUIT;
 			break;
 
-		case 'c':
+		case SDLK_c:
+			// CLOSE CURRENT DOCUMENT
 			Green_Close( rtd, rtd->doc_cur );
 			*flags |= FLAG_RENDER;
 			break;
 
-		case '/':
+		case SDLK_SLASH:
 		case SDLK_s:
-			/* type s-SEARCHSTRING-<Enter> to search string */
+			// START SEARCHING
 			state = SEARCH;
-			break;
-
-		case 'n':
-			// search next
-			if (!doc || !doc->search_str)
-				break;
-			
-			doc->page_cur = Green_FindNext( doc, doc->page_cur + 1 );
-			*flags |= FLAG_RENDER;
 			break;
 
 		case SDLK_f:
@@ -496,58 +565,41 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
-		case SDLK_UP:
-		case SDLK_k:
-			// scroll up
-			if (!doc)
+		case SDLK_u: // pageup
+			if (SDL_GetModState() & KMOD_CTRL) {
+				// scroll up a whole page
+				if (!doc)
+					break;
+				Green_ScrollRelative( doc, 0, - display->h * 0.5, display->w, display->h, 1 );
+				*flags |= FLAG_RENDER;
 				break;
-			Green_ScrollRelative( doc, 0, - display->h * rtd->step, display->w, display->h, 1 );
-			*flags |= FLAG_RENDER;
-			break;
+			}
 
-		case SDLK_DOWN:
-        case SDLK_j:
-			// scroll down
-			if (!doc)
+		case SDLK_d: // pageup
+			if (SDL_GetModState() & KMOD_CTRL) {
+				// scroll down a whole page
+				if (!doc)
+					break;
+				Green_ScrollRelative( doc, 0, display->h * 0.5, display->w, display->h, 1 );
+				*flags |= FLAG_RENDER;
 				break;
-			
-			Green_ScrollRelative( doc, 0, display->h * rtd->step, display->w, display->h, 1 );
-			*flags |= FLAG_RENDER;
-			break;
+			}
 
-		case SDLK_LEFT:
-		case SDLK_h:
-			// scroll left
-			if (!doc)
-				break;
-			
-			Green_ScrollRelative( doc, - display->w * rtd->step, 0, display->w, display->h, 1 );
-			*flags |= FLAG_RENDER;
-			break;
-
-		case SDLK_l:
-		case SDLK_RIGHT:
-			// scroll right
-			if (!doc)
-				break;
-			
-			Green_ScrollRelative( doc, display->w * rtd->step, 0, display->w, display->h, 1 );
-			*flags |= FLAG_RENDER;
-			break;
-
+		case SDLK_BACKSPACE:
 		case SDLK_PAGEUP: // pageup
 			// scroll up a whole page
 			if (!doc)
 				break;
-			Green_ScrollRelative( doc, 0, - display->h * 1, display->w, display->h, 1 );
+			Green_ScrollRelative( doc, 0, - display->h * 0.95, display->w, display->h, 1 );
 			*flags |= FLAG_RENDER;
 			break;
 
+		case SDLK_SPACE:
 		case SDLK_PAGEDOWN: // pagedn
 			// scroll down a whole page
 			if (!doc)
 				break;
-			Green_ScrollRelative( doc, 0, display->h * 1, display->w, display->h, 1 );
+			Green_ScrollRelative( doc, 0, display->h * 0.95, display->w, display->h, 1 );
 			*flags |= FLAG_RENDER;
 			break;
 
@@ -596,17 +648,42 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
+		case SDLK_n:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// goto next document
+				Green_NextValidDoc( rtd );
+			}
+			else
+			{
+				// search next
+				if (!doc || !doc->search_str)
+					break;
+				doc->page_cur = Green_FindNext( doc, doc->page_cur + 1 );
+			}
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_p:
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				// goto previous document
+				Green_PrevValidDoc( rtd );
+			}
+			*flags |= FLAG_RENDER;
+			break;
 
 		case SDLK_TAB:
 			if (SDL_GetModState() & KMOD_SHIFT)
+				// goto previous document
 				Green_PrevValidDoc( rtd ); else
+				// goto next document
 				Green_NextValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
 
 		default:
 			break;
-	}
 	}
 	
 	return state;
@@ -670,7 +747,6 @@ int	Green_SDL_Main( Green_RTD *rtd )
 	if (!rtd->mouse.visibility || !(rtd->mouse.flags & 0x01))
 		SDL_ShowCursor( SDL_DISABLE );
 
-	SDL_EnableUNICODE( SDL_ENABLE );
 	SDL_EnableKeyRepeat( SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL );
 	
 	do

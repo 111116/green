@@ -101,8 +101,10 @@ PROGRAM OPERATION
 `l, <right>` - Scroll right.  
 `j, <down>` - Scroll down.  
 `k, <up>` - Scroll up.  
-`<pageup>` - Scroll up a whole screen.  
-`<pagedown>` - Scroll down a whole screen.  
+`<CTRL-u>` - Scroll up a half screen.  
+`<CTRL-d>` - Scroll down a half screen.  
+`<pageup>, <backspace>` - Scroll up a whole screen.  
+`<pagedown>, <space>` - Scroll down a whole screen.  
 
 ### NAVIGATION
 `H, K` - Go to previous page.  

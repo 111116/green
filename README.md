@@ -127,7 +127,7 @@ PROGRAM OPERATION
 `f` - fit page height.  
 
 ### SEARCHING 
-`(/ or s)<X><RETURN>` - Start search for string *X*.  
+`(/ or CTRL-f)<X><RETURN>` - Start search for string *X*.  
 `n` - Show next result.
 
 ### OTHER STUFF

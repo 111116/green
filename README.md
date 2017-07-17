@@ -20,7 +20,7 @@ MATE.
  - uses SDL to support various frontends (including framebuffer)
  - multiple documents
  - single page mode
- - fit width, height or page
+ - fit width or height
  - zooming
  - goto page
  - search function
@@ -59,7 +59,7 @@ USAGE
 
 ### example:
 
-    green -nomouse -fit=page example.pdf
+    green -nomouse example.pdf
     green -help
     greep -v
 
@@ -67,8 +67,6 @@ USAGE
 OPTIONS
 -------
 
-`-fit=`
-    with one of *none, width, height* or *page* tp select the program wide page fitting mode.  
 `-width=` 
     with an integer greate equal zero (in pixels) to specify the startup width of the window.  
 `-height=` 
@@ -81,8 +79,6 @@ OPTIONS
     with a file name of a configuration file.  
 `-scheme=`
     with an `<id list>` (see below) to select a different scheme.  
-`-fit=<type>`
-    how to fit the page on screen (width, height, page or none)  
 `-zoomstep=<fraction>`
     to specify zooming step (e.g. 1/8)  
 `-step=<fraction>`
@@ -115,7 +111,7 @@ PROGRAM OPERATION
 `G` - Go to last page of document.  
 `:<n><RETURN>` - Go to page n.  
 
-`P` - Go to previous document.  
+`P, <SHIFT-TAB>` - Go to previous document.  
 `N, <TAB>` - Go to next document.  
 `c` - close current document.  
 `f1` to `f12` - Goto n-th document.
@@ -125,10 +121,8 @@ PROGRAM OPERATION
 ### FITTING
 `+` - Zoom in.  
 `-` - Zoom out.  
-`fn` - disable page fitting mode.  
-`fw` - fit page width.  
-`fh` - fit page height.  
-`fp` - fit whole page.  
+`w` - fit page width.  
+`f` - fit page height.  
 
 ### SEARCHING 
 `(/ or s)<X><RETURN>` - Start search for string *X*.  
@@ -171,7 +165,6 @@ FILES
     SCHEME normal
     {
     	Background.Color = darkgray
-    	Fit = width
     	Mouse = 0
     }
     DEFAULT_SCHEME normal

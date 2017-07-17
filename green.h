@@ -27,7 +27,7 @@
 
 typedef enum
 {
-	NATURAL, WIDTH, HEIGHT, PAGE
+	WIDTH, HEIGHT
 	
 }	Green_FitMethod;
 

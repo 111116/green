@@ -25,7 +25,7 @@
 
 typedef enum
 {
-	NORMAL, GOTO, SEARCH, FIT, MIRROR
+	NORMAL, GOTO, SEARCH, MIRROR
 	
 }	RState;
 
@@ -476,8 +476,24 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
-		case 'f':
-			state = FIT;
+		case SDLK_f:
+			if (!Green_IsDocValid( rtd, rtd->doc_cur ))
+				break;
+			rtd->docs[rtd->doc_cur]->fit_method = HEIGHT;
+			rtd->docs[rtd->doc_cur]->finescale = 1;
+			rtd->docs[rtd->doc_cur]->xoffset = 0;
+			rtd->docs[rtd->doc_cur]->yoffset = 0;
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_w:
+			if (!Green_IsDocValid( rtd, rtd->doc_cur ))
+				break;
+			rtd->docs[rtd->doc_cur]->fit_method = WIDTH;
+			rtd->docs[rtd->doc_cur]->finescale = 1;
+			rtd->docs[rtd->doc_cur]->xoffset = 0;
+			rtd->docs[rtd->doc_cur]->yoffset = 0;
+			*flags |= FLAG_RENDER;
 			break;
 
 		case SDLK_UP:
@@ -582,7 +598,9 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 
 
 		case SDLK_TAB:
-			Green_NextValidDoc( rtd );
+			if (SDL_GetModState() & KMOD_SHIFT)
+				Green_PrevValidDoc( rtd ); else
+				Green_NextValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
 
@@ -733,32 +751,6 @@ int	Green_SDL_Main( Green_RTD *rtd )
 					}
 					else if (state == GOTO || state == SEARCH)
 						GetInput( &input, &event );
-					else if (state == FIT)
-					{
-						state = NORMAL;
-						if (!Green_IsDocValid( rtd, rtd->doc_cur ))
-							break;
-						
-						if (event.key.keysym.sym == 'n')
-							rtd->docs[rtd->doc_cur]->fit_method = NATURAL;
-						else if (event.key.keysym.sym == 'w')
-							rtd->docs[rtd->doc_cur]->fit_method = WIDTH;
-						else if (event.key.keysym.sym == 'h')
-							rtd->docs[rtd->doc_cur]->fit_method = HEIGHT;
-						else if (event.key.keysym.sym == 'p')
-							rtd->docs[rtd->doc_cur]->fit_method = PAGE;
-						
-						if (event.key.keysym.sym == 'n'
-							|| event.key.keysym.sym == 'w'
-							|| event.key.keysym.sym == 'h'
-							|| event.key.keysym.sym == 'p')
-						{
-							rtd->docs[rtd->doc_cur]->finescale = 1;
-							rtd->docs[rtd->doc_cur]->xoffset = 0;
-							rtd->docs[rtd->doc_cur]->yoffset = 0;
-							flags |= FLAG_RENDER;
-						}
-					}
 					else if (state == MIRROR)
 					{
 						state = NORMAL;

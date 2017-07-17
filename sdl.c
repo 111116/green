@@ -22,6 +22,9 @@
 #define FLAG_QUIT	0x0001
 #define FLAG_RENDER	0x0002
 
+#define CONTINUOUS_SCROLLING_ON
+const int GAP_BETWEEN_PAGES = 5;
+
 
 typedef enum
 {
@@ -113,7 +116,7 @@ void	GetInput( IBuffer *input, SDL_Event *event )
 	return;
 }
 
-void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage *page, double tscale )
+void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, int page_num, PopplerPage *page, double tscale )
 {
 	PopplerRectangle	*rect;
 	Green_Document	*doc = rtd->docs[rtd->doc_cur];
@@ -133,7 +136,7 @@ void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage 
 	if (doc->search_str)
 		list = poppler_page_find_text( page, doc->search_str );
 
-	if (doc->cache.surface && doc->cache.page == doc->page_cur && doc->cache.tscale == tscale)
+	if (doc->cache.surface && doc->cache.page == page_num && doc->cache.tscale == tscale)
 		surface = doc->cache.surface;
 	else
 	{
@@ -152,7 +155,7 @@ void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage 
 			cairo_surface_destroy( doc->cache.surface );
 
 		doc->cache.surface = surface;
-		doc->cache.page = doc->page_cur;
+		doc->cache.page = page_num;
 		doc->cache.tscale = tscale;
 	}
 
@@ -370,8 +373,43 @@ void	Render( Green_RTD *rtd )
 	rect.h = h > display->h ? display->h : h;
 	rect.x = (display->w - rect.w) / 2;
 	rect.y = (display->h - rect.h) / 2;
-	RenderPage( rtd, rect, doc->xoffset, doc->yoffset, page, tscale );
+	RenderPage( rtd, rect, doc->xoffset, doc->yoffset, doc->page_cur, page, tscale );
 	g_object_unref( G_OBJECT( page ) );
+#ifdef CONTINUOUS_SCROLLING_ON
+	int page_num = doc->page_cur;
+	int curh = (display->h + h) / 2 + GAP_BETWEEN_PAGES ;
+	while ( (++page_num) < doc->page_count )
+	{
+		page = poppler_document_get_page( doc->doc, page_num );
+		Green_GetDimension( page, &w, &h, tscale, doc->rotation % 2 );
+		SDL_Rect cur_rect;
+		cur_rect.w = w > display->w ? display->w : w;
+		cur_rect.x = (display->w - rect.w) / 2;
+		cur_rect.y = curh;
+		if (display->h <= curh) break;
+		cur_rect.h = h > display->h - curh ? display->h - curh : h;
+		int delta = h - cur_rect.h;
+		RenderPage( rtd, cur_rect, doc->xoffset + delta * (doc->rotation == 3), doc->yoffset + delta * (doc->rotation == 2), page_num, page, tscale );
+		g_object_unref( G_OBJECT( page ) );
+		curh += h + GAP_BETWEEN_PAGES;
+	}
+	page_num = doc->page_cur;
+	curh = (display->h - h) / 2;
+	while ( (--page_num) >= 0 && curh >= GAP_BETWEEN_PAGES)
+	{
+		page = poppler_document_get_page( doc->doc, page_num );
+		Green_GetDimension( page, &w, &h, tscale, doc->rotation % 2 );
+		curh -= h + GAP_BETWEEN_PAGES;
+		SDL_Rect cur_rect;
+		cur_rect.w = w > display->w ? display->w : w;
+		cur_rect.x = (display->w - rect.w) / 2;
+		int delta = curh < 0 ? -curh : 0;
+		cur_rect.y = curh + delta;
+		cur_rect.h = h - delta;
+		RenderPage( rtd, cur_rect, doc->xoffset + delta * (doc->rotation == 1), doc->yoffset + delta * (doc->rotation == 0), page_num, page, tscale );
+		g_object_unref( G_OBJECT( page ) );
+	}
+#endif
 	SDL_UpdateRect( display, 0, 0, 0, 0 );
 	return;
 }

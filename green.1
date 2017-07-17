@@ -35,7 +35,7 @@ or MATE.
 .PD 0
 .P
 .PD
-• fit width, height or page
+• fit width or height
 .PD 0
 .P
 .PD
@@ -57,18 +57,13 @@ or MATE.
 .IP
 .nf
 \f[C]
-green\ \-nomouse\ \-fit=page\ example.pdf
+green\ \-nomouse\ example.pdf
 green\ \-help
 greep\ \-v
 \f[]
 .fi
 .SH OPTIONS
 .PP
-\f[CB]\-fit=\f[] with one of \f[I]none, width, height\f[] or
-\f[I]page\f[] tp select the program wide page fitting mode.
-.PD 0
-.P
-.PD
 \f[CB]\-width=\f[] with an integer greate equal zero (in pixels) to
 specify the startup width of the window.
 .PD 0
@@ -93,11 +88,6 @@ specify the startup height of the window.
 .PD
 \f[CB]\-scheme=\f[] with an \f[C]<id\ list>\f[] (see below) to select a
 different scheme.
-.PD 0
-.P
-.PD
-\f[CB]\-fit=<type>\f[] how to fit the page on screen (width, height, page
-or none)
 .PD 0
 .P
 .PD
@@ -170,7 +160,7 @@ or none)
 .PD
 \f[C]:<n><RETURN>\f[] \- Go to page n.
 .PP
-\f[C]P\f[] \- Go to previous document.
+\f[C]P,\ <SHIFT-TAB>\f[] \- Go to previous document.
 .PD 0
 .P
 .PD
@@ -197,19 +187,11 @@ or none)
 .PD 0
 .P
 .PD
-\f[C]fn\f[] \- disable page fitting mode.
+\f[C]w\f[] \- fit page width.
 .PD 0
 .P
 .PD
-\f[C]fw\f[] \- fit page width.
-.PD 0
-.P
-.PD
-\f[C]fh\f[] \- fit page height.
-.PD 0
-.P
-.PD
-\f[C]fp\f[] \- fit whole page.
+\f[C]f\f[] \- fit page height.
 .SS SEARCHING
 .PP
 \f[C](/\ or\ s)<X><RETURN>\f[] \- Start search for string \f[I]X\f[].
@@ -276,7 +258,6 @@ The system wide configuration file.
 SCHEME\ normal
 {
 \ \ \ \ Background.Color\ =\ darkgray
-\ \ \ \ Fit\ =\ width
 \ \ \ \ Mouse\ =\ 0
 }
 DEFAULT_SCHEME\ normal

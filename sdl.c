@@ -22,6 +22,9 @@
 #define FLAG_QUIT	0x0001
 #define FLAG_RENDER	0x0002
 
+#define CONTINUOUS_SCROLLING_ON
+const int GAP_BETWEEN_PAGES = 5;
+
 
 typedef enum
 {
@@ -113,7 +116,7 @@ void	GetInput( IBuffer *input, SDL_Event *event )
 	return;
 }
 
-void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage *page, double tscale )
+void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, int page_num, PopplerPage *page, double tscale )
 {
 	PopplerRectangle	*rect;
 	Green_Document	*doc = rtd->docs[rtd->doc_cur];
@@ -133,7 +136,7 @@ void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage 
 	if (doc->search_str)
 		list = poppler_page_find_text( page, doc->search_str );
 
-	if (doc->cache.surface && doc->cache.page == doc->page_cur && doc->cache.tscale == tscale)
+	if (doc->cache.surface && doc->cache.page == page_num && doc->cache.tscale == tscale)
 		surface = doc->cache.surface;
 	else
 	{
@@ -152,7 +155,7 @@ void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage 
 			cairo_surface_destroy( doc->cache.surface );
 
 		doc->cache.surface = surface;
-		doc->cache.page = doc->page_cur;
+		doc->cache.page = page_num;
 		doc->cache.tscale = tscale;
 	}
 
@@ -343,80 +346,71 @@ void	RenderPage( Green_RTD *rtd, SDL_Rect dest, int xoff, int yoff, PopplerPage 
 	return;
 }
 
+int SinglePageRender( int page_num, Green_Document *doc, SDL_Surface *display, int cur_y, double tscale )
+{
+	PopplerPage	*page = poppler_document_get_page( doc->doc, page_num );
+	int w, h;
+	Green_GetDimension( page, &w, &h, tscale, doc->rotation % 2 );
+	SDL_Rect rect;
+
+	RenderPage( rtd, rect, xoffset, yoffset, page_num, page, tscale );
+
+	g_object_unref( G_OBJECT( page ) );
+	return // valid height
+}
+
 void	Render( Green_RTD *rtd )
 {
-	Green_Document	*doc;
-	PopplerPage	*page = NULL;
 	SDL_Surface	*display = SDL_GetVideoSurface();
-	SDL_Rect	rect;
-	double	tscale;
-	int	w, h;
-	
+
+	SDL_Rect rect;
 	rect.x = rect.y = 0;
 	rect.w = display->w;
 	rect.h = display->h;
 	SDL_FillRect( display, &rect, SDL_MapRGB( display->format, rtd->c_background.r, rtd->c_background.g, rtd->c_background.b ));
-	if (!Green_IsDocValid( rtd, rtd->doc_cur ))
+
+	if (Green_IsDocValid( rtd, rtd->doc_cur ))
 	{
-		SDL_UpdateRect( display, 0, 0, 0, 0 );
-		return;
+		Green_Document	*doc = rtd->docs[rtd->doc_cur];
+		tscale = Green_Fit( doc, display->w, display->h ) * doc->finescale;
+		SinglePageRender( doc->page_cur, doc, display, , tscale);
+#ifdef CONTINUOUS_SCROLLING_ON
+		int page_num = doc->page_cur;
+		int cury = (display->h + h) / 2 - doc->yoffset + GAP_BETWEEN_PAGES;
+		while ( (++page_num) < doc->page_count )
+		{
+			int h = SinglePageRender( page_num, doc, display, cur_y, tscale);
+			if (h <= 0) break;
+			cury += h + GAP_BETWEEN_PAGES;
+		}
+		page_num = doc->page_cur;
+		//cury = (display->h - h) / 2 - doc->yoffset;
+		while ( (--page_num) >= 0)
+		{
+			page = poppler_document_get_page( doc->doc, page_num );
+			Green_GetDimension( page, &w, &h, tscale, doc->rotation % 2 );
+			cury -= h + GAP_BETWEEN_PAGES;
+		}
+#endif
 	}
 	
-	doc = rtd->docs[rtd->doc_cur];
-	tscale = Green_Fit( doc, display->w, display->h ) * doc->finescale;
-	page = poppler_document_get_page( doc->doc, doc->page_cur );
-	Green_GetDimension( page, &w, &h, tscale, doc->rotation % 2 );
-	rect.w = w > display->w ? display->w : w;
-	rect.h = h > display->h ? display->h : h;
-	rect.x = (display->w - rect.w) / 2;
-	rect.y = (display->h - rect.h) / 2;
-	RenderPage( rtd, rect, doc->xoffset, doc->yoffset, page, tscale );
-	g_object_unref( G_OBJECT( page ) );
 	SDL_UpdateRect( display, 0, 0, 0, 0 );
 	return;
 }
 
 RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 {
-	static int repeattime = 0;
 	Green_Document	*doc = NULL;
 	SDL_Surface	*display = SDL_GetVideoSurface();
 	RState	state = NORMAL;
-	int	f = 0, num = 0;
+	int	f = 0;
 	
 	if (Green_IsDocValid( rtd, rtd->doc_cur ))
 		doc = rtd->docs[rtd->doc_cur];
 	
 	switch (event->key.keysym.sym)
 	{
-		case SDLK_9: ++num;
-		case SDLK_8: ++num;
-		case SDLK_7: ++num;
-		case SDLK_6: ++num;
-		case SDLK_5: ++num;
-		case SDLK_4: ++num;
-		case SDLK_3: ++num;
-		case SDLK_2: ++num;
-		case SDLK_1: ++num;
-		case SDLK_0:
-			if (repeattime < 100000000)
-				repeattime = repeattime * 10 + num;
-			num = 0;
-			break;
-
-		case SDLK_ESCAPE:
-			repeattime = 0;
-			break;
-
 		case SDLK_g:
-			if (repeattime)
-			{
-				if (repeattime >= rtd->docs[rtd->doc_cur]->page_count)
-					repeattime = rtd->docs[rtd->doc_cur]->page_count;
-				rtd->docs[rtd->doc_cur]->page_cur = repeattime - 1;
-				repeattime = 0;
-			}
-			else
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
 				// goto doc end
@@ -432,10 +426,6 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
-		default:
-		for (repeattime += !repeattime; repeattime; --repeattime)
-		switch (event->key.keysym.sym)
-		{
 		case SDLK_k:
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
@@ -536,6 +526,14 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
+		case SDLK_SEMICOLON:
+			// GOTO MODE
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				state = GOTO;
+				break;
+			}
+
 		case SDLK_MINUS:
 			// ZOOM OUT
 			if (!doc)
@@ -560,7 +558,6 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 		case SDLK_c:
 			// CLOSE CURRENT DOCUMENT
 			Green_Close( rtd, rtd->doc_cur );
-			Green_NextValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
 
@@ -654,6 +651,35 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
+		case SDLK_F12:
+			f++;
+		case SDLK_F11:
+			f++;
+		case SDLK_F10:
+			f++;
+		case SDLK_F9:
+			f++;
+		case SDLK_F8:
+			f++;
+		case SDLK_F7:
+			f++;
+		case SDLK_F6:
+			f++;
+		case SDLK_F5:
+			f++;
+		case SDLK_F4:
+			f++;
+		case SDLK_F3:
+			f++;
+		case SDLK_F2:
+			f++;
+		case SDLK_F1:
+			if (!Green_IsDocValid( rtd, f ))
+				break;
+			rtd->doc_cur = f;
+			*flags |= FLAG_RENDER;
+			break;
+
 		case SDLK_n:
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
@@ -688,35 +714,8 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
-		case SDLK_F12: f++;
-		case SDLK_F11: f++;
-		case SDLK_F10: f++;
-		case SDLK_F9: f++;
-		case SDLK_F8: f++;
-		case SDLK_F7: f++;
-		case SDLK_F6: f++;
-		case SDLK_F5: f++;
-		case SDLK_F4: f++;
-		case SDLK_F3: f++;
-		case SDLK_F2: f++;
-		case SDLK_F1:
-			if (!Green_IsDocValid( rtd, f ))
-				break;
-			rtd->doc_cur = f;
-			*flags |= FLAG_RENDER;
-			break;
-
-		case SDLK_SEMICOLON:
-			// GOTO MODE
-			if (SDL_GetModState() & KMOD_SHIFT)
-			{
-				state = GOTO;
-				break;
-			}
-
 		default:
 			break;
-		}
 	}
 	
 	return state;
@@ -784,7 +783,7 @@ int	Green_SDL_Main( Green_RTD *rtd )
 	
 	do
 	{
-		if (flags&FLAG_RENDER)
+		if (flags & FLAG_RENDER)
 		{
 			Render( rtd );
 			flags ^= FLAG_RENDER;
@@ -805,7 +804,7 @@ int	Green_SDL_Main( Green_RTD *rtd )
 					flags |= FLAG_QUIT;
 					break;
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE && state != NORMAL)
+					if (event.key.keysym.sym == SDLK_ESCAPE)
 						state = NORMAL;
 					else if (event.key.keysym.sym == SDLK_RETURN)
 					{

@@ -378,17 +378,45 @@ void	Render( Green_RTD *rtd )
 
 RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 {
+	static int repeattime = 0;
 	Green_Document	*doc = NULL;
 	SDL_Surface	*display = SDL_GetVideoSurface();
 	RState	state = NORMAL;
-	int	f = 0;
+	int	f = 0, num = 0;
 	
 	if (Green_IsDocValid( rtd, rtd->doc_cur ))
 		doc = rtd->docs[rtd->doc_cur];
 	
 	switch (event->key.keysym.sym)
 	{
+		case SDLK_9: ++num;
+		case SDLK_8: ++num;
+		case SDLK_7: ++num;
+		case SDLK_6: ++num;
+		case SDLK_5: ++num;
+		case SDLK_4: ++num;
+		case SDLK_3: ++num;
+		case SDLK_2: ++num;
+		case SDLK_1: ++num;
+		case SDLK_0:
+			if (repeattime < 100000000)
+				repeattime = repeattime * 10 + num;
+			num = 0;
+			break;
+
+		case SDLK_ESCAPE:
+			repeattime = 0;
+			break;
+
 		case SDLK_g:
+			if (repeattime)
+			{
+				if (repeattime >= rtd->docs[rtd->doc_cur]->page_count)
+					repeattime = rtd->docs[rtd->doc_cur]->page_count;
+				rtd->docs[rtd->doc_cur]->page_cur = repeattime - 1;
+				repeattime = 0;
+			}
+			else
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
 				// goto doc end
@@ -404,6 +432,10 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
+		default:
+		for (repeattime += !repeattime; repeattime; --repeattime)
+		switch (event->key.keysym.sym)
+		{
 		case SDLK_k:
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
@@ -504,14 +536,6 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
-		case SDLK_SEMICOLON:
-			// GOTO MODE
-			if (SDL_GetModState() & KMOD_SHIFT)
-			{
-				state = GOTO;
-				break;
-			}
-
 		case SDLK_MINUS:
 			// ZOOM OUT
 			if (!doc)
@@ -536,6 +560,7 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 		case SDLK_c:
 			// CLOSE CURRENT DOCUMENT
 			Green_Close( rtd, rtd->doc_cur );
+			Green_NextValidDoc( rtd );
 			*flags |= FLAG_RENDER;
 			break;
 
@@ -629,35 +654,6 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
-		case SDLK_F12:
-			f++;
-		case SDLK_F11:
-			f++;
-		case SDLK_F10:
-			f++;
-		case SDLK_F9:
-			f++;
-		case SDLK_F8:
-			f++;
-		case SDLK_F7:
-			f++;
-		case SDLK_F6:
-			f++;
-		case SDLK_F5:
-			f++;
-		case SDLK_F4:
-			f++;
-		case SDLK_F3:
-			f++;
-		case SDLK_F2:
-			f++;
-		case SDLK_F1:
-			if (!Green_IsDocValid( rtd, f ))
-				break;
-			rtd->doc_cur = f;
-			*flags |= FLAG_RENDER;
-			break;
-
 		case SDLK_n:
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
@@ -692,8 +688,35 @@ RState	NormalInput( Green_RTD *rtd, SDL_Event *event, unsigned short *flags )
 			*flags |= FLAG_RENDER;
 			break;
 
+		case SDLK_F12: f++;
+		case SDLK_F11: f++;
+		case SDLK_F10: f++;
+		case SDLK_F9: f++;
+		case SDLK_F8: f++;
+		case SDLK_F7: f++;
+		case SDLK_F6: f++;
+		case SDLK_F5: f++;
+		case SDLK_F4: f++;
+		case SDLK_F3: f++;
+		case SDLK_F2: f++;
+		case SDLK_F1:
+			if (!Green_IsDocValid( rtd, f ))
+				break;
+			rtd->doc_cur = f;
+			*flags |= FLAG_RENDER;
+			break;
+
+		case SDLK_SEMICOLON:
+			// GOTO MODE
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				state = GOTO;
+				break;
+			}
+
 		default:
 			break;
+		}
 	}
 	
 	return state;
@@ -782,7 +805,7 @@ int	Green_SDL_Main( Green_RTD *rtd )
 					flags |= FLAG_QUIT;
 					break;
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE)
+					if (event.key.keysym.sym == SDLK_ESCAPE && state != NORMAL)
 						state = NORMAL;
 					else if (event.key.keysym.sym == SDLK_RETURN)
 					{

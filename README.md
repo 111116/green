@@ -19,11 +19,8 @@ MATE.
  - uses libpoppler for PDF reading
  - uses SDL to support various frontends (including framebuffer)
  - multiple documents
- - single page mode
- - fit width or height
- - zooming
- - goto page
- - search function
+ - vim-styled movements
+ - searching & zooming
  - scheme support
  
 INSTALLATION

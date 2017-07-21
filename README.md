@@ -10,7 +10,7 @@ original version: [schandinat/green](https://github.com/schandinat/green)
 DESCRIPTION
 -----------
 
-`green` is meant to be a light PDF reader for the Linux Framebuffer. 
+*green* is meant to be a light PDF reader for the Linux Framebuffer. 
 However, it can also be used inside a graphical X11 Session like GNOME or
 MATE. 
 
